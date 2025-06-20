@@ -10,6 +10,7 @@ export class DatabaseService {
       } else {
         this.db = db;
         this.initTables();
+        this.seedDummyData(); // Call after tables are initialized
       }
     });
   }
@@ -74,5 +75,45 @@ export class DatabaseService {
         FOREIGN KEY (userID) REFERENCES User(userID)
       );
     `);
+  }
+
+  private seedDummyData() {
+    // Check if users already exist
+    this.db.get("SELECT COUNT(*) AS count FROM User", [], (err, row) => {
+      if (err) {
+        console.error("Error checking User table:", err);
+        return;
+      }
+
+      if (row.count === 0) {
+        // Insert dummy users
+        this.db.execSQL(`
+          INSERT INTO User (username, firstName, lastName, email, password, bio, profileImage, createdAt)
+          VALUES
+            ('johndoe', 'John', 'Doe', 'john@example.com', 'password123', 'Just a test user.', '', datetime('now')),
+            ('janedoe', 'Jane', 'Doe', 'jane@example.com', 'password123', 'Another test user.', '', datetime('now'));
+        `);
+
+        // Insert dummy tweets
+        this.db.execSQL(`
+          INSERT INTO Tweet (tweetTitle, contents, mediaUrl, createdAt)
+          VALUES
+            ('Hello World', 'This is my first tweet!', '', datetime('now')),
+            ('Another Day', 'Just testing the app.', '', datetime('now'));
+        `);
+
+        // Link tweets to users
+        this.db.execSQL(`
+          INSERT INTO UserTweet (userID, tweetID, createdAt)
+          VALUES
+            (1, 1, datetime('now')),
+            (2, 2, datetime('now'));
+        `);
+
+        console.log("Dummy data seeded.");
+      } else {
+        console.log("Dummy data already exists. Skipping seed.");
+      }
+    });
   }
 }
