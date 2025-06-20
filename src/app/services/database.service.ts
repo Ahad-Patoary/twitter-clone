@@ -1,22 +1,27 @@
 import * as Sqlite from "nativescript-sqlite";
 
+const isDev = global.isDevEnvironment ?? true; // Set this to false in production
+const dbName = isDev ? "twitter_clone_dev.db" : "twitter_clone.db";
+
 export class DatabaseService {
   private db: any;
 
   constructor() {
-    new Sqlite("twitter_clone.db", (err, db) => {
+    new Sqlite(dbName, (err, db) => {
       if (err) {
         console.error("SQLite DB error:", err);
       } else {
         this.db = db;
         this.initTables();
-        this.seedDummyData(); // Call after tables are initialized
+
+        if (isDev) {
+          this.seedDummyData(); // Only seed in development
+        }
       }
     });
   }
 
   private initTables() {
-    // User Table
     this.db.execSQL(`
       CREATE TABLE IF NOT EXISTS User (
         userID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +36,6 @@ export class DatabaseService {
       );
     `);
 
-    // Tweet Table
     this.db.execSQL(`
       CREATE TABLE IF NOT EXISTS Tweet (
         tweetID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,7 +51,6 @@ export class DatabaseService {
       );
     `);
 
-    // UserTweet Join Table
     this.db.execSQL(`
       CREATE TABLE IF NOT EXISTS UserTweet (
         userID INTEGER,
@@ -62,7 +65,6 @@ export class DatabaseService {
       );
     `);
 
-    // TweetReply Table
     this.db.execSQL(`
       CREATE TABLE IF NOT EXISTS TweetReply (
         replyID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +80,6 @@ export class DatabaseService {
   }
 
   private seedDummyData() {
-    // Check if users already exist
     this.db.get("SELECT COUNT(*) AS count FROM User", [], (err, row) => {
       if (err) {
         console.error("Error checking User table:", err);
@@ -86,7 +87,6 @@ export class DatabaseService {
       }
 
       if (row.count === 0) {
-        // Insert dummy users
         this.db.execSQL(`
           INSERT INTO User (username, firstName, lastName, email, password, bio, profileImage, createdAt)
           VALUES
@@ -94,7 +94,6 @@ export class DatabaseService {
             ('janedoe', 'Jane', 'Doe', 'jane@example.com', 'password123', 'Another test user.', '', datetime('now'));
         `);
 
-        // Insert dummy tweets
         this.db.execSQL(`
           INSERT INTO Tweet (tweetTitle, contents, mediaUrl, createdAt)
           VALUES
@@ -102,7 +101,6 @@ export class DatabaseService {
             ('Another Day', 'Just testing the app.', '', datetime('now'));
         `);
 
-        // Link tweets to users
         this.db.execSQL(`
           INSERT INTO UserTweet (userID, tweetID, createdAt)
           VALUES
