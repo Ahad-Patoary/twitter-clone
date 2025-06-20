@@ -1,8 +1,10 @@
 import * as Sqlite from "nativescript-sqlite";
+import { Injectable } from '@angular/core';
 
 const isDev = global.isDevEnvironment ?? true; // Set this to false in production
 const dbName = isDev ? "twitter_clone_dev.db" : "twitter_clone.db";
 
+@Injectable({ providedIn: 'root' })
 export class DatabaseService {
   private db: any;
 
