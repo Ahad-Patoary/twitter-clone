@@ -114,4 +114,16 @@ export class DatabaseService {
       }
     });
   }
+  getUserByCredentials(username: string, password: string): Promise<User | null> {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        `SELECT * FROM User WHERE username = ? AND password = ?`,
+        [username, password],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row || null);
+        }
+      );
+    });
+  }
 }
