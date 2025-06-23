@@ -2,7 +2,9 @@
     <Label text="Login"></Label>
 </ActionBar>
 
-<GridLayout>
-    <!-- Add your page content here -->
-    <Label text="Welcome to the Login Page!" class="text-lg text-center"></Label>
-</GridLayout>
+<StackLayout>
+    <TextField [(ngModel)]="username" name="username" hint="Username"></TextField>
+    <TextField [(ngModel)]="password" name="password" hint="Password" secure="true"></TextField>
+    <Button text="Login" (tap)="onLogin()"></Button>
+    <Label *ngIf="errorMessage" [text]="errorMessage" class="error"></Label>
+</StackLayout>

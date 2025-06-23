@@ -1,5 +1,6 @@
 import * as Sqlite from "nativescript-sqlite";
 import { Injectable } from '@angular/core';
+import { User } from '../models/user.model';
 
 const isDev = global.isDevEnvironment ?? true; // Set this to false in production
 const dbName = isDev ? "twitter_clone_dev.db" : "twitter_clone.db";
@@ -9,6 +10,7 @@ export class DatabaseService {
   private db: any;
 
   constructor() {
+
     new Sqlite(dbName, (err, db) => {
       if (err) {
         console.error("SQLite DB error:", err);
@@ -88,7 +90,9 @@ export class DatabaseService {
         return;
       }
 
-      if (row.count === 0) {
+      const count = Array.isArray(row) ? row[0] : row?.count;
+
+      if (count === 0) {
         this.db.execSQL(`
           INSERT INTO User (username, firstName, lastName, email, password, bio, profileImage, createdAt)
           VALUES
@@ -118,14 +122,27 @@ export class DatabaseService {
   }
   getUserByCredentials(username: string, password: string): Promise<User | null> {
     return new Promise((resolve, reject) => {
+      console.log("Attempting to fetch user with username:", username);
+
       this.db.get(
         `SELECT * FROM User WHERE username = ? AND password = ?`,
         [username, password],
         (err, row) => {
-          if (err) reject(err);
-          else resolve(row || null);
+          if (err) {
+            console.error("Database error:", err);
+            reject(err);
+          } else {
+            if (row) {
+              console.log("User found:", row);
+              resolve(row);
+            } else {
+              console.log("No user found with provided credentials.");
+              resolve(null);
+            }
+          }
         }
       );
     });
   }
 }
+
