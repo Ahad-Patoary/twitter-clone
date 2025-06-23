@@ -2,7 +2,14 @@
     <Label text="Sign Up"></Label>
 </ActionBar>
 
-<GridLayout>
-    <!-- Add your page content here -->
-    <Label text="Welcome to the Sign Up Page" class="text-lg text-center"></Label>
-</GridLayout>
+<StackLayout>
+    <TextField [(ngModel)]="form.username" name="username" hint="Username"></TextField>
+    <TextField [(ngModel)]="form.firstName" name="firstName" hint="First Name"></TextField>
+    <TextField [(ngModel)]="form.lastName" name="lastName" hint="Last Name"></TextField>
+    <TextField [(ngModel)]="form.email" name="email" hint="Email"></TextField>
+    <TextField [(ngModel)]="form.password" name="password" hint="Password" secure="true"></TextField>
+    <TextField [(ngModel)]="form.confirmPassword" name="confirmPassword" hint="Confirm Password" secure="true"></TextField>
+    <Button text="Sign Up" (tap)="onSignup()"></Button>
+    <Label *ngIf="errorMessage" [text]="errorMessage" class="error"></Label>
+</StackLayout>
+

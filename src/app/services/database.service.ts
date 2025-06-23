@@ -144,5 +144,69 @@ export class DatabaseService {
       );
     });
   }
+
+  createUser(user: User): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.execSQL(
+        `INSERT INTO User (username, firstName, lastName, email, password, bio, profileImage, createdAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          user.username,
+          user.firstName,
+          user.lastName,
+          user.email,
+          user.password,
+          user.bio,
+          user.profileImage,
+          user.createdAt
+        ],
+        (err) => {
+          if (err) {
+            console.error("Error inserting user:", err);
+            reject(err);
+          } else {
+            console.log("User created successfully.");
+            resolve();
+          }
+        }
+      );
+    });
+  }
+
+  deleteUserById(userID: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.execSQL(
+        `DELETE FROM User WHERE userID = ?`,
+        [userID],
+        (err) => {
+          if (err) {
+            console.error("Error deleting user:", err);
+            reject(err);
+          } else {
+            console.log(`User with ID ${userID} deleted.`);
+            resolve();
+          }
+        }
+      );
+    });
+  }
+
+
+  logAllUsers(): void {
+    this.db.all(`SELECT * FROM User`, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching users:", err);
+      } else {
+        if (rows.length === 0) {
+          console.log("User table is empty.");
+        } else {
+          console.log("All users in the User table:");
+          rows.forEach((row, index) => {
+            console.log(`User ${index + 1}:`, row);
+          });
+        }
+      }
+    });
+  }
 }
 

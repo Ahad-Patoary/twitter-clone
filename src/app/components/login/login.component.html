@@ -6,5 +6,6 @@
     <TextField [(ngModel)]="username" name="username" hint="Username"></TextField>
     <TextField [(ngModel)]="password" name="password" hint="Password" secure="true"></TextField>
     <Button text="Login" (tap)="onLogin()"></Button>
+    <Button text="Don't have an account? Sign Up" (tap)="goToSignup()" class="link"></Button>
     <Label *ngIf="errorMessage" [text]="errorMessage" class="error"></Label>
 </StackLayout>

@@ -31,4 +31,8 @@ export class LoginComponent {
       this.errorMessage = 'Invalid username or password';
     }
   }
+
+  goToSignup() {
+    this.router.navigate(['/signup']);
+  }
 }
