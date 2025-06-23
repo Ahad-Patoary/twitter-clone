@@ -47,7 +47,7 @@ export class SignUpComponent {
       password: this.form.password,
       bio: '',
       profileImage: '',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString().replace('T', ' ')
     }).then(() => {
       this.router.navigate(['/login']);
     }).catch(err => {
