@@ -235,34 +235,57 @@ export class DatabaseService {
         `INSERT INTO Tweet (tweetTitle, contents, mediaUrl, isReply, replyToTweetID, createdAt)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [tweetTitle, contents, mediaURL, isReply, replyToTweetID, createdAt],
-        (err, tweetID) => {
+        (err, result) => {
           if (err) {
             console.error("Error inserting tweet:", err);
             reject(err);
           } else {
-            console.log("Tweet inserted with ID:", tweetID);
+            // Get the last inserted tweet ID
+            this.db.get("SELECT last_insert_rowid() AS tweetID", [], (err, row) => {
+              if (err) {
+                console.error("Error retrieving tweet ID:", err);
+                reject(err);
+              } else {
+                const tweetID = row.tweetID;
 
-            if (userID) {
-              this.db.execSQL(
-                `INSERT INTO UserTweet (userID, tweetID, createdAt)
-                 VALUES (?, ?, ?)`,
-                [userID, tweetID, createdAt],
-                (err) => {
-                  if (err) {
-                    console.error("Error linking tweet to user:", err);
-                    reject(err);
-                  } else {
-                    resolve();
-                  }
+                if (userID) {
+                  this.db.execSQL(
+                    `INSERT INTO UserTweet (userID, tweetID, createdAt)
+                     VALUES (?, ?, ?)`,
+                    [userID, tweetID, createdAt],
+                    (err) => {
+                      if (err) {
+                        console.error("Error linking tweet to user:", err);
+                        reject(err);
+                      } else {
+                        resolve();
+                      }
+                    }
+                  );
+                } else {
+                  resolve();
                 }
-              );
-            } else {
-              resolve();
-            }
+              }
+            });
           }
         }
       );
     });
   }
+
+  clearTweetTable(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.execSQL(`DELETE FROM Tweet`, [], (err) => {
+        if (err) {
+          console.error("Error clearing Tweet table:", err);
+          reject(err);
+        } else {
+          console.log("Tweet table cleared.");
+          resolve();
+        }
+      });
+    });
+  }
+
 }
 

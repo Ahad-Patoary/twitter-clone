@@ -20,7 +20,9 @@ export class ComposeComponent {
   mediaURL: string = '';
   confirmationMessage: string = '';
 
-  constructor(private databaseService : DatabaseService, private userService : UserService) { }
+  constructor(private databaseService : DatabaseService, private userService : UserService) {
+
+  }
 
   async postTweet() {
     const newTweet: Tweet = {

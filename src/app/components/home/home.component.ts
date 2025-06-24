@@ -12,5 +12,4 @@ import { ComposeComponent } from '../compose/compose.component'
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class HomeComponent {
-
 }
