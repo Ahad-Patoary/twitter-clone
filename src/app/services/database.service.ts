@@ -1,6 +1,7 @@
 import * as Sqlite from "nativescript-sqlite";
 import { Injectable } from '@angular/core';
 import { User } from '../models/user.model';
+import { Tweet } from '../models/tweet.model';
 
 const isDev = global.isDevEnvironment ?? true; // Set this to false in production
 const dbName = isDev ? "twitter_clone_dev.db" : "twitter_clone.db";
@@ -120,10 +121,9 @@ export class DatabaseService {
       }
     });
   }
+
   getUserByCredentials(username: string, password: string): Promise<User | null> {
     return new Promise((resolve, reject) => {
-      console.log("Attempting to fetch user with username:", username);
-
       this.db.get(
         `SELECT * FROM User WHERE username = ? AND password = ?`,
         [username, password],
@@ -131,19 +131,27 @@ export class DatabaseService {
           if (err) {
             console.error("Database error:", err);
             reject(err);
+          } else if (row) {
+            const user: User = {
+              userID: row[0],
+              username: row[1],
+              firstName: row[2],
+              lastName: row[3],
+              email: row[4],
+              password: row[5],
+              bio: row[6],
+              profileImage: row[7],
+              createdAt: row[8]
+            };
+            resolve(user);
           } else {
-            if (row) {
-              console.log("User found:", row);
-              resolve(row);
-            } else {
-              console.log("No user found with provided credentials.");
-              resolve(null);
-            }
+            resolve(null);
           }
         }
       );
     });
   }
+
 
   createUser(user: User): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -206,6 +214,54 @@ export class DatabaseService {
           });
         }
       }
+    });
+  }
+
+
+
+  insertTweet(tweet: Tweet): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const {
+        tweetTitle,
+        contents,
+        mediaURL,
+        isReply = 0,
+        replyToTweetID = null,
+        createdAt,
+        userID
+      } = tweet;
+
+      this.db.execSQL(
+        `INSERT INTO Tweet (tweetTitle, contents, mediaUrl, isReply, replyToTweetID, createdAt)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [tweetTitle, contents, mediaURL, isReply, replyToTweetID, createdAt],
+        (err, tweetID) => {
+          if (err) {
+            console.error("Error inserting tweet:", err);
+            reject(err);
+          } else {
+            console.log("Tweet inserted with ID:", tweetID);
+
+            if (userID) {
+              this.db.execSQL(
+                `INSERT INTO UserTweet (userID, tweetID, createdAt)
+                 VALUES (?, ?, ?)`,
+                [userID, tweetID, createdAt],
+                (err) => {
+                  if (err) {
+                    console.error("Error linking tweet to user:", err);
+                    reject(err);
+                  } else {
+                    resolve();
+                  }
+                }
+              );
+            } else {
+              resolve();
+            }
+          }
+        }
+      );
     });
   }
 }

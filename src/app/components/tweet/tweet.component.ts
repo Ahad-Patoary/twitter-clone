@@ -11,5 +11,4 @@ import {
   schemas: [NO_ERRORS_SCHEMA],
 })
 export class TweetComponent {
-
 }

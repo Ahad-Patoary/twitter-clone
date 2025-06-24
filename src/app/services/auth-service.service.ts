@@ -25,4 +25,8 @@ export class UserService {
   getCurrentUser(): User | null {
     return this.currentUser;
   }
+
+  getCurrentUserID(): number | null {
+    return this.currentUser ? this.currentUser.userID : null;
+  }
 }

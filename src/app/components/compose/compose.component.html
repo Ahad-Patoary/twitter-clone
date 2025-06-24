@@ -2,7 +2,11 @@
     <Label text="Create Tweet"></Label>
 </ActionBar>
 
-<GridLayout>
-    <!-- Add your page content here -->
-    <Label text="Welcome to the Tweet Creation Page!" class="text-lg text-center"></Label>
-</GridLayout>
+<StackLayout>
+    <TextField [(ngModel)]="tweetTitle" hint="Tweet Title"></TextField>
+    <TextView [(ngModel)]="tweetText" hint="What's happening?" maxLength="280" rows="5"></TextView>
+    <Label [text]="tweetText.length + '/280'"></Label>
+    <TextField [(ngModel)]="mediaURL" hint="Media URL (optional)"></TextField>
+    <Button text="Tweet" [isEnabled]="tweetText.trim().length > 0 && tweetTitle.trim().length > 0" (tap)="postTweet()"></Button>
+    <Label *ngIf="confirmationMessage" [text]="confirmationMessage" class="text-success mt-10"></Label>
+</StackLayout>
