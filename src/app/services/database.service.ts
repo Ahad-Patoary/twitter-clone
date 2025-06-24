@@ -217,6 +217,39 @@ export class DatabaseService {
     });
   }
 
+  logAllTweets(): void {
+    this.db.all(`SELECT * FROM Tweet`, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching tweets:", err);
+      } else {
+        if (rows.length === 0) {
+          console.log("Tweet table is empty.");
+        } else {
+          console.log("All tweets in the tweet table:");
+          rows.forEach((row, index) => {
+            console.log(`Tweet ${index + 1}:`, row);
+          });
+        }
+      }
+    });
+  }
+
+  logAllUserTweets(): void {
+    this.db.all(`SELECT * FROM UserTweet`, [], (err, rows) => {
+      if (err) {
+        console.error("Error fetching user tweets:", err);
+      } else {
+        if (rows.length === 0) {
+          console.log("UserTweet table is empty.");
+        } else {
+          console.log("All user tweets in the tweet table:");
+          rows.forEach((row, index) => {
+            console.log(`UserTweet ${index + 1}:`, row);
+          });
+        }
+      }
+    });
+  }
 
 
   insertTweet(tweet: Tweet): Promise<void> {
@@ -231,7 +264,9 @@ export class DatabaseService {
         userID
       } = tweet;
 
-      this.db.execSQL(
+      const db = this.db
+
+      db.execSQL(
         `INSERT INTO Tweet (tweetTitle, contents, mediaUrl, isReply, replyToTweetID, createdAt)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [tweetTitle, contents, mediaURL, isReply, replyToTweetID, createdAt],
@@ -242,11 +277,16 @@ export class DatabaseService {
           } else {
             // Get the last inserted tweet ID
             this.db.get("SELECT last_insert_rowid() AS tweetID", [], (err, row) => {
+              console.log("Row from last_insert_rowid():", row);
               if (err) {
                 console.error("Error retrieving tweet ID:", err);
                 reject(err);
               } else {
-                const tweetID = row.tweetID;
+                const tweetID = row[0];
+
+                if (!tweetID) {
+                  console.warn("Warning: tweetID is null or undefined!");
+                }
 
                 if (userID) {
                   this.db.execSQL(
@@ -287,5 +327,36 @@ export class DatabaseService {
     });
   }
 
+  getUserTweets(userID: number): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT
+          Tweet.tweetID,
+          Tweet.tweetTitle,
+          Tweet.contents,
+          Tweet.mediaUrl,
+          Tweet.createdAt,
+          Tweet.likes,
+          Tweet.retweets
+        FROM
+          Tweet
+        JOIN
+          UserTweet ON Tweet.tweetID = UserTweet.tweetID
+        WHERE
+          UserTweet.userID = ? AND UserTweet.isRetweet = 0
+        ORDER BY
+          Tweet.createdAt DESC;
+      `;
+
+      this.db.all(query, [userID], (err, rows) => {
+        if (err) {
+          console.error("Error fetching user tweets:", err);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
 }
 

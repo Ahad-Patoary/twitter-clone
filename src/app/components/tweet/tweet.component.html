@@ -2,9 +2,23 @@
     <Label text="Tweet"></Label>
 </ActionBar>
 
-<GridLayout>
-    <!-- Add your page content here -->
-    <Label text="Welcome to the Tweet Page" class="text-lg text-center"></Label>
-</GridLayout>
+<ScrollView>
+    <StackLayout class="tweet-feed" padding="10">
+        <ng-container *ngIf="tweetFeed.length > 0; else noTweets">
+            <StackLayout *ngFor="let tweet of tweetFeed" class="tweet-card" marginBottom="15" padding="10" backgroundColor="#f0f0f0" borderRadius="8">
+                <Label [text]="'📝 ' + tweet[1]" class="tweet-title" fontWeight="bold" fontSize="18"></Label>
+                <Label [text]="tweet[2]" class="tweet-content" marginTop="5"></Label>
+                <Image *ngIf="tweet[3]" [src]="tweet.mediaUrl" stretch="aspectFill" height="150" marginTop="10" borderRadius="6"></Image>
+                <Label [text]="'❤️ ' + tweet[5] + '   🔁 ' + tweet[6]" class="tweet-stats" marginTop="10" color="#888"></Label>
+                <Label [text]="tweet[4]" class="tweet-date" fontSize="12" color="#aaa" marginTop="5"></Label>
+            </StackLayout>
+        </ng-container>
+
+        <ng-template #noTweets>
+            <Label text="You haven't posted any tweets yet." class="no-tweets" textWrap="true" marginTop="20" horizontalAlignment="center"></Label>
+        </ng-template>
+    </StackLayout>
+</ScrollView>
+
 
 
